@@ -1,90 +1,240 @@
-# Code-Judge: Automated Code Evaluation Platform
+# 🚀 Code-Judge
 
-[cite_start]**Code-Judge** is a high-performance, web-based platform designed to automate programming evaluation for academic labs and coding competitions[cite: 340, 342]. [cite_start]By leveraging a **microservices architecture** and **Docker-based sandboxing**, it eliminates "it works on my machine" inconsistencies and ensures secure, real-time code execution[cite: 341, 345, 346].
+### Automated Code Evaluation Platform
 
----
-
-## 🚀 Key Features
-
-* [cite_start]**Automated Assessment:** Instant grading by comparing user output against hidden test cases[cite: 344, 393].
-* [cite_start]**Secure Sandboxing:** Executes untrusted code in isolated Docker containers with restricted CPU, memory, and network access[cite: 346, 396, 461, 533].
-* [cite_start]**Multi-Language Support:** Initial support for **C (GCC)** and **Python 3**[cite: 403, 511].
-* [cite_start]**Real-Time Analytics:** Live global leaderboards and detailed submission history for every user[cite: 466, 467, 556].
-* [cite_start]**Integrated Code Editor:** A browser-based IDE (Monaco) with syntax highlighting and keyboard shortcuts[cite: 458, 529, 575].
-* [cite_start]**Enterprise-Grade DevOps:** Fully automated CI/CD pipeline via **GitHub Actions** for seamless deployment[cite: 347, 469, 557].
+![Build](https://img.shields.io/github/actions/workflow/status/MONISH-cloud/CODE_JUDGE/main.yml?label=Build\&style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge\&logo=docker)
+![Kubernetes](https://img.shields.io/badge/K8s-Orchestrated-326CE5?style=for-the-badge\&logo=kubernetes)
 
 ---
 
-## 🏗 System Architecture
+## 📌 Overview
 
-[cite_start]The platform is built as a distributed system of independent microservices communicating via a central **API Gateway**[cite: 416, 419, 630]:
+**Code-Judge** is a scalable, secure, and high-performance platform designed for **automated evaluation of programming submissions** in:
 
-* [cite_start]**Auth Service:** Manages secure, stateless sessions using **JWT (JSON Web Tokens)**[cite: 450, 603].
-* [cite_start]**Problem Service:** Repositories for coding challenges, descriptions, and hidden test cases[cite: 446, 605].
-* [cite_start]**Execution Engine:** The core "Sandbox" that interfaces with the **Docker Daemon** to lifecycle-manage ephemeral containers[cite: 429, 431, 550].
-* [cite_start]**Leaderboard Service:** Tracks user points and ranks based on problem difficulty[cite: 466, 606].
+* 🎓 Academic Labs
+* 🧪 University Exams
+* 🏆 Coding Competitions
+
+It uses a **microservices architecture** and **Docker-based sandboxing** to ensure:
+
+* ✅ Consistent execution
+* 🔒 Secure isolation
+* ⚡ Real-time evaluation
+
+---
+
+## ✨ Features
+
+### ⚙️ Core Capabilities
+
+* Automated code grading using hidden test cases
+* Real-time execution with instant feedback
+* Multi-language support (C, Python)
+* Leaderboards and analytics
+
+### 🔐 Security
+
+* Sandboxed execution (Docker containers)
+* No root access
+* Network isolation
+* Resource limits (CPU, RAM, Time)
+
+### 💻 Developer Experience
+
+* Monaco-based browser IDE
+* Submission history tracking
+* Clean UI for problem solving
+
+### 🚀 DevOps Ready
+
+* CI/CD using GitHub Actions
+* Kubernetes deployment support
+* Microservices architecture
+
+---
+
+## 🏗️ Architecture
+
+```
+                ┌───────────────┐
+                │   Frontend    │
+                │ React / Vue   │
+                └──────┬────────┘
+                       │
+                ┌──────▼────────┐
+                │  API Gateway  │
+                └──────┬────────┘
+     ┌──────────────┬──────────────┬──────────────┐
+     ▼              ▼              ▼              ▼
+┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
+│  Auth    │ │  Problem   │ │ Execution  │ │ Leaderboard│
+│ Service  │ │ Service    │ │  Engine    │ │  Service   │
+└──────────┘ └────────────┘ └────────────┘ └────────────┘
+                                │
+                                ▼
+                         ┌────────────┐
+                         │  Docker    │
+                         │ Sandbox    │
+                         └────────────┘
+```
 
 ---
 
 ## 💻 Tech Stack
 
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | [cite_start]React / Vue [cite: 423] |
-| **Backend** | [cite_start]Node.js (Express) or Go (Golang) [cite: 499] |
-| **Databases** | [cite_start]PostgreSQL (Relational), MongoDB (Logs/Source Code) [cite: 437, 500, 501] |
-| **Containerization** | [cite_start]Docker Engine (v20.10+), Kubernetes [cite: 492, 593] |
-| **Communication** | [cite_start]REST (HTTP/JSON), gRPC, RabbitMQ [cite: 502, 503] |
-| **CI/CD** | [cite_start]GitHub Actions [cite: 439, 522] |
+| Layer         | Technology             |
+| ------------- | ---------------------- |
+| Frontend      | React / Vue            |
+| Backend       | Node.js (Express) / Go |
+| Database      | PostgreSQL, MongoDB    |
+| Containers    | Docker                 |
+| Orchestration | Kubernetes             |
+| Messaging     | RabbitMQ / gRPC        |
+| CI/CD         | GitHub Actions         |
 
 ---
 
-## 🛠 Prerequisites & Installation
+## 🛠️ Installation
 
-### Server Requirements
-* [cite_start]**OS:** Linux (Ubuntu 20.04 LTS preferred) or Alpine Linux[cite: 491, 591].
-* [cite_start]**Runtime:** Docker Engine v20.10+ must be active and accessible via Unix Socket[cite: 492, 520, 593].
-* [cite_start]**Hardware:** Minimum 4GB RAM (8GB+ recommended for production)[cite: 488, 490].
+### 📌 Prerequisites
 
-### Local Development
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/MONISH-cloud/CODE_JUDGE.git
-    cd code-judge
-    ```
-2.  **Infrastructure Setup:**
-    * [cite_start]Ensure **Minikube** or **Docker Desktop** is running[cite: 442, 488].
-    * [cite_start]Configure environment variables for JWT and Database strings[cite: 450, 437].
-3.  **Deployment:**
-    * [cite_start]The CI/CD pipeline will automatically build and deploy the services upon pushing to the `main` branch[cite: 469, 470, 557].
+* Linux (Ubuntu 20.04 recommended)
+* Docker Engine (v20.10+)
+* Node.js / Go
+* 4GB RAM minimum (8GB recommended)
+
+---
+
+
+### ⚙️ Environment Variables
+
+Create a `.env` file:
+
+```
+JWT_SECRET=your_secret_key
+POSTGRES_URI=your_postgres_connection
+MONGO_URI=your_mongodb_connection
+```
+
+---
+
+### ▶️ Run with Docker
+
+```bash
+docker-compose up --build
+```
+
+---
+
+### ☸️ Kubernetes Deployment
+
+```bash
+kubectl apply -f k8s/
+```
 
 ---
 
 ## 👥 User Roles
 
-* [cite_start]**Developers:** Browse problems, submit solutions, and track rankings[cite: 475, 479, 480].
-* [cite_start]**Admins:** Manage problem sets, upload hidden test cases, and view system-wide analytics[cite: 453, 525, 526].
-* [cite_start]**DevOps (PRE):** Responsible for system uptime, Kubernetes scaling, and security compliance[cite: 482, 485].
+### 👨‍💻 Developers
+
+* Solve problems
+* Submit code
+* Track rankings
+
+### 🛠 Admins
+
+* Manage problems
+* Upload test cases
+* View analytics
+
+### ⚙️ DevOps
+
+* Maintain uptime
+* Scale services
+* Ensure security
 
 ---
 
-## 🛡 Security Constraints
+## 🛡️ Security Model
 
-To maintain host integrity, the system enforces the following:
-* [cite_start]**No Root Access:** User code runs under a low-privilege UID (>1000)[cite: 505, 560].
-* [cite_start]**Network Isolation:** Execution containers have no internet access[cite: 559].
-* [cite_start]**Resource Limits:** Strict enforcement of memory (e.g., 256MB) and execution time (e.g., 2.0s)[cite: 463, 553, 626, 627].
-* [cite_start]**Ephemeral Filesystems:** Submission containers use read-only filesystems that are destroyed immediately after execution[cite: 506, 585, 586].
-
----
-
-## 📝 Roadmap & Known Issues
-
-* [cite_start][ ] **ISS-02:** Plagiarism Detection integration (MOSS vs Custom service)[cite: 636].
-* [cite_start][ ] **ISS-04:** Finalizing standardized C compiler flags (e.g., `-O2`, `-Wall`)[cite: 638].
-* [cite_start][ ] **ISS-05:** University SSO integration[cite: 639].
+* 🔒 Non-root execution
+* 🌐 No internet access in containers
+* ⏱ Execution time limits
+* 💾 Memory constraints
+* ♻️ Ephemeral containers
 
 ---
 
-[cite_start]**Prepared by:** TEAM DEVGRU (RV University) [cite: 326, 328]
-[cite_start]**Version:** 1.0 [cite: 325]
+## 📊 Workflow
+
+1. User submits code
+2. API Gateway forwards request
+3. Execution Engine creates container
+4. Code is compiled & executed
+5. Output is matched with test cases
+6. Result is returned instantly
+
+---
+
+## 🧪 Supported Languages
+
+| Language | Compiler |
+| -------- | -------- |
+| C        | GCC      |
+| Python   | Python 3 |
+
+---
+
+## 📝 Roadmap
+
+* [ ] Plagiarism Detection (MOSS / AI-based)
+* [ ] Add Java, C++, JavaScript
+* [ ] University SSO Integration
+* [ ] AI Code Feedback System
+
+---
+
+## 📷 Screenshots (Add Yours)
+
+```
+/assets/editor.png
+/assets/leaderboard.png
+/assets/submission.png
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a new branch
+3. Commit changes
+4. Push and create PR
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**
+
+---
+
+## 👨‍💻 Team
+
+**DEVGRU**
+RV University
+
+---
+
+## ⭐ Support
+
+If you like this project:
+
+* Star ⭐ the repo
+* Share with others
+* Contribute 🚀
+
+---
