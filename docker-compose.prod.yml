@@ -1,28 +1,26 @@
 services:
   postgres:
-    image: postgres:15
-    restart: always
+    image: postgres:15-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-codejudge}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-codejudge}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   auth-service:
-    image: ${DOCKERHUB_USERNAME}/codejudge-auth-service:latest
-    restart: always
-    ports:
-      - "3001:3001"
+    build: ./services/auth-service
+    restart: unless-stopped
     environment:
       PORT: 3001
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-codejudge}
@@ -33,31 +31,27 @@ services:
         condition: service_healthy
 
   problem-service:
-    image: ${DOCKERHUB_USERNAME}/codejudge-problem-service:latest
-    restart: always
-    ports:
-      - "3002:3002"
+    build: ./services/problem-service
+    restart: unless-stopped
     environment:
       PORT: 3002
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-codejudge}
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       TC_DIR: /app/testcases
+    volumes:
+      - testcases_data:/app/uploads
+      - ./seed/testcases:/app/testcases:ro
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - testcases_data:/app/uploads
-      - ./seed/testcases:/app/testcases
 
   submission-service:
-    image: ${DOCKERHUB_USERNAME}/codejudge-submission-service:latest
-    restart: always
-    ports:
-      - "3003:3003"
+    build: ./services/submission-service
+    restart: unless-stopped
     environment:
       PORT: 3003
       DB_HOST: postgres
@@ -65,18 +59,18 @@ services:
       DB_NAME: ${DB_NAME:-codejudge}
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - testcases_data:/app/uploads
+      - ./seed/testcases:/app/testcases:ro
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - testcases_data:/app/uploads
-      - ./seed/testcases:/app/testcases
 
   frontend:
-    image: ${DOCKERHUB_USERNAME}/codejudge-frontend:latest
-    restart: always
+    build: ./frontend
+    restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - auth-service
       - problem-service
