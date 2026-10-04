@@ -1,14 +1,8 @@
-FROM node:24-alpine
-
+FROM node:20-alpine
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm install
-
-RUN mkdir -p uploads/testcases
-
+RUN npm ci --omit=dev
 COPY . .
-
+RUN mkdir -p /app/uploads
 EXPOSE 3002
-
-CMD ["node", "src/index.js"]
+CMD ["npm","start"]
