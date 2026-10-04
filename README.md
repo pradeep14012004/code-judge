@@ -1,240 +1,100 @@
-# 🚀 Code-Judge
+# CodeJudge
 
-### Automated Code Evaluation Platform
+A microservices-based platform for automated programming evaluation, designed for academic labs, university assessments and coding practice.
 
-![Build](https://img.shields.io/github/actions/workflow/status/MONISH-cloud/CODE_JUDGE/main.yml?label=Build\&style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge\&logo=docker)
-![Kubernetes](https://img.shields.io/badge/K8s-Orchestrated-326CE5?style=for-the-badge\&logo=kubernetes)
+## What it does
 
----
+CodeJudge accepts programming submissions, executes them in isolated containers, evaluates the output against test cases and returns the result to the user.
 
-## 📌 Overview
+### Core capabilities
 
-**Code-Judge** is a scalable, secure, and high-performance platform designed for **automated evaluation of programming submissions** in:
+- JWT-based authentication and role-based access
+- Problem and test-case management
+- Sandboxed code execution
+- Submission history and evaluation results
+- Resource limits for execution
+- Docker-based deployment
+- Web-based coding interface
 
-* 🎓 Academic Labs
-* 🧪 University Exams
-* 🏆 Coding Competitions
+## Architecture
 
-It uses a **microservices architecture** and **Docker-based sandboxing** to ensure:
-
-* ✅ Consistent execution
-* 🔒 Secure isolation
-* ⚡ Real-time evaluation
-
----
-
-## ✨ Features
-
-### ⚙️ Core Capabilities
-
-* Automated code grading using hidden test cases
-* Real-time execution with instant feedback
-* Multi-language support (C, Python)
-* Leaderboards and analytics
-
-### 🔐 Security
-
-* Sandboxed execution (Docker containers)
-* No root access
-* Network isolation
-* Resource limits (CPU, RAM, Time)
-
-### 💻 Developer Experience
-
-* Monaco-based browser IDE
-* Submission history tracking
-* Clean UI for problem solving
-
-### 🚀 DevOps Ready
-
-* CI/CD using GitHub Actions
-* Kubernetes deployment support
-* Microservices architecture
-
----
-
-## 🏗️ Architecture
-
-```
-                ┌───────────────┐
-                │   Frontend    │
-                │ React / Vue   │
-                └──────┬────────┘
-                       │
-                ┌──────▼────────┐
-                │  API Gateway  │
-                └──────┬────────┘
-     ┌──────────────┬──────────────┬──────────────┐
-     ▼              ▼              ▼              ▼
-┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
-│  Auth    │ │  Problem   │ │ Execution  │ │ Leaderboard│
-│ Service  │ │ Service    │ │  Engine    │ │  Service   │
-└──────────┘ └────────────┘ └────────────┘ └────────────┘
-                                │
-                                ▼
-                         ┌────────────┐
-                         │  Docker    │
-                         │ Sandbox    │
-                         └────────────┘
+```text
+Web Client
+    |
+    v
+API / Backend
+    |
+    +--------> Authentication
+    |
+    +--------> Problem Management
+    |
+    +--------> Submission Service
+                  |
+                  v
+            Docker Sandbox
+                  |
+                  v
+          Compile / Execute
+                  |
+                  v
+            Test Evaluation
+                  |
+                  v
+             Result API
 ```
 
----
+## Tech Stack
 
-## 💻 Tech Stack
+| Component | Technology |
+|---|---|
+| Frontend | React + Vite |
+| Backend | Node.js + Express |
+| Database | PostgreSQL |
+| Execution | Docker |
+| Authentication | JWT + bcrypt |
+| Development | JavaScript, Git, Docker Compose |
 
-| Layer         | Technology             |
-| ------------- | ---------------------- |
-| Frontend      | React / Vue            |
-| Backend       | Node.js (Express) / Go |
-| Database      | PostgreSQL, MongoDB    |
-| Containers    | Docker                 |
-| Orchestration | Kubernetes             |
-| Messaging     | RabbitMQ / gRPC        |
-| CI/CD         | GitHub Actions         |
+> The README intentionally lists only technologies present in the current implementation. Kubernetes, Go, Vue, MongoDB, RabbitMQ and gRPC are not presented as implemented features unless they are actually present in the repository.
 
----
+## Security considerations
 
-## 🛠️ Installation
+Code execution is an untrusted-input problem. The project uses container isolation and execution/resource restrictions, but a production judge should additionally use hardened container profiles, read-only filesystems, seccomp/AppArmor, strict CPU/memory/time limits, network isolation and independent security review.
 
-### 📌 Prerequisites
+**Never expose this service directly to untrusted traffic without appropriate sandbox hardening.**
 
-* Linux (Ubuntu 20.04 recommended)
-* Docker Engine (v20.10+)
-* Node.js / Go
-* 4GB RAM minimum (8GB recommended)
+## Getting Started
 
----
-
-
-### ⚙️ Environment Variables
-
-Create a `.env` file:
-
-```
-JWT_SECRET=your_secret_key
-POSTGRES_URI=your_postgres_connection
-MONGO_URI=your_mongodb_connection
-```
-
----
-
-### ▶️ Run with Docker
+Clone the repository:
 
 ```bash
-docker-compose up --build
+git clone https://github.com/pradeep14012004/code-judge.git
+cd code-judge
 ```
 
----
+Install dependencies according to the frontend/backend package files, configure the PostgreSQL connection and environment variables, then start the services using the repository's Docker Compose configuration.
 
-### ☸️ Kubernetes Deployment
+Do not commit `.env` files, database passwords, JWT secrets or other credentials.
 
-```bash
-kubectl apply -f k8s/
-```
+## Workflow
 
----
+1. User authenticates.
+2. User selects a problem and submits code.
+3. Backend validates the submission.
+4. Execution service starts an isolated container.
+5. Code is compiled/executed with configured limits.
+6. Output is compared with test cases.
+7. Evaluation status is returned and stored.
 
-## 👥 User Roles
+## Future Improvements
 
-### 👨‍💻 Developers
+- Additional programming languages
+- Stronger sandbox isolation
+- Plagiarism detection
+- University SSO
+- Automated test coverage
+- Observability and execution metrics
+- Optional Kubernetes deployment
 
-* Solve problems
-* Submit code
-* Track rankings
+## License
 
-### 🛠 Admins
-
-* Manage problems
-* Upload test cases
-* View analytics
-
-### ⚙️ DevOps
-
-* Maintain uptime
-* Scale services
-* Ensure security
-
----
-
-## 🛡️ Security Model
-
-* 🔒 Non-root execution
-* 🌐 No internet access in containers
-* ⏱ Execution time limits
-* 💾 Memory constraints
-* ♻️ Ephemeral containers
-
----
-
-## 📊 Workflow
-
-1. User submits code
-2. API Gateway forwards request
-3. Execution Engine creates container
-4. Code is compiled & executed
-5. Output is matched with test cases
-6. Result is returned instantly
-
----
-
-## 🧪 Supported Languages
-
-| Language | Compiler |
-| -------- | -------- |
-| C        | GCC      |
-| Python   | Python 3 |
-
----
-
-## 📝 Roadmap
-
-* [ ] Plagiarism Detection (MOSS / AI-based)
-* [ ] Add Java, C++, JavaScript
-* [ ] University SSO Integration
-* [ ] AI Code Feedback System
-
----
-
-## 📷 Screenshots (Add Yours)
-
-```
-/assets/editor.png
-/assets/leaderboard.png
-/assets/submission.png
-```
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a new branch
-3. Commit changes
-4. Push and create PR
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**
-
----
-
-## 👨‍💻 Team
-
-**DEVGRU**
-RV University
-
----
-
-## ⭐ Support
-
-If you like this project:
-
-* Star ⭐ the repo
-* Share with others
-* Contribute 🚀
-
----
+See the repository license for the applicable terms.
