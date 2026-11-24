@@ -44,7 +44,7 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-codejudge}
       DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
       TC_DIR: /app/testcases
     volumes:
       - testcases_data:/app/uploads
@@ -64,13 +64,41 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-codejudge}
       DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      EXECUTION_QUEUE_DIR: /queue
     volumes:
       - testcases_data:/app/uploads
       - ./seed/testcases:/app/testcases:ro
+      - execution_queue:/queue
     depends_on:
       postgres:
         condition: service_healthy
+
+  execution-worker:
+    build: ./services/execution-worker
+    restart: unless-stopped
+    init: true
+    network_mode: none
+    read_only: true
+    user: "0:0"
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: 1.0
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=128m,mode=0755
+      - /work:rw,exec,nosuid,nodev,size=128m,mode=1777
+    environment:
+      EXECUTION_QUEUE_DIR: /queue
+    volumes:
+      - execution_queue:/queue
 
   frontend:
     build: ./frontend
@@ -85,3 +113,4 @@ services:
 volumes:
   postgres_data:
   testcases_data:
+  execution_queue:

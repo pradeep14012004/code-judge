@@ -2,7 +2,7 @@
 
 CodeJudge is a self-hostable programming evaluation platform for academic labs, university coursework, and coding practice. It combines a React frontend with Node.js services and PostgreSQL.
 
-> **Security status:** CodeJudge is a development/research project, not a hardened public online judge. The current submission runner compiles and executes submitted C programs as child processes inside the submission-service container. A process timeout and output-buffer limit are not an operating-system security sandbox. **Do not expose submission endpoints to untrusted users or deploy this project as a public judge until the runner has been moved into a separately isolated execution environment and independently reviewed.**
+> **Security status:** CodeJudge is a development/research project, not a hardened public online judge. The submission API now hands jobs to a separate worker container configured with no network, a read-only root filesystem, dropped capabilities, restricted resources, and per-job unprivileged UIDs. This is defense in depth, not a complete security boundary: ordinary containers share the host kernel, and this implementation has not had an independent security audit. **Do not expose it to untrusted users or deploy it as a public judge without stronger sandboxing (such as gVisor or microVM isolation), authentication/authorization review, and security testing.**
 
 ## Current capabilities
 
@@ -133,7 +133,7 @@ The repository's service package manifests currently contain placeholder test sc
 
 ## Security
 
-Running arbitrary source code is a high-risk operation. The current runner uses child processes and resource limits but does **not** provide a complete security boundary. Before public or multi-tenant deployment, the execution worker must be isolated from the API and database, run with least privilege, have no network access by default, use strict CPU/memory/process/disk/time limits, and be protected by OS/container sandboxing. Review [SECURITY.md](SECURITY.md) before testing or deploying.
+Running arbitrary source code is a high-risk operation. The submission API queues jobs in a shared, permission-restricted volume. A separate execution-worker container processes them with `network_mode: none`, a read-only root filesystem, no-new-privileges, dropped capabilities, PID/memory/CPU limits, a bounded temporary filesystem, and a fresh unprivileged UID for each job. Job processes receive no database credentials or API network access. This is defense in depth, not a complete sandbox: containers share the host kernel. For public or multi-tenant use, deploy a stronger boundary such as gVisor or microVMs, review all authentication/authorization paths, and perform independent security testing. Review [SECURITY.md](SECURITY.md) before testing or deploying.
 
 Please report suspected vulnerabilities privately using the process in [SECURITY.md](SECURITY.md). Do not publish exploit details in public issues.
 
@@ -143,7 +143,7 @@ Bug reports, documentation improvements, tests, and security hardening proposals
 
 ## Roadmap
 
-- Isolated execution workers with defense-in-depth sandboxing
+- Stronger per-job isolation using gVisor or microVMs, plus independent security review
 - Authentication and authorization checks on all submission and history endpoints
 - Automated unit, integration, and end-to-end tests
 - Reproducible local development and deployment configuration

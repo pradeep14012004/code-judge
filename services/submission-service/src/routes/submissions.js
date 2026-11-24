@@ -2,47 +2,30 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const { judge } = require('../judge');
-const path = require('path');
-const { spawnSync } = require('child_process');
-const fs = require('fs');
-const os = require('os');
+const { runSource } = require('../execution-client');
 
 // POST run code (returns actual output, no DB save)
 router.post('/run', async (req, res) => {
-  const { source_code, input } = req.body;
-  if (!source_code) return res.status(400).json({ message: 'source_code required' });
-
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'run-'));
-  const srcFile = path.join(tmpDir, 'solution.c');
-  const binFile = path.join(tmpDir, 'solution');
+  const { source_code, input = '' } = req.body;
+  if (typeof source_code !== 'string' || !source_code.trim()) {
+    return res.status(400).json({ message: 'source_code required' });
+  }
 
   try {
-    fs.writeFileSync(srcFile, source_code);
-    const compile = spawnSync('gcc', [srcFile, '-o', binFile, '-lm'], { timeout: 10000 });
-    if (compile.status !== 0) {
-      return res.json({ success: false, error: compile.stderr.toString(), output: null });
+    const result = await runSource(source_code, input, 5000);
+    if (result.verdict !== 'Executed') {
+      return res.json({ success: false, error: result.error || result.verdict, output: null, verdict: result.verdict });
     }
-    const run = spawnSync(binFile, [], {
-      input: input || '',
-      timeout: 5000,
-      maxBuffer: 1024 * 1024,
-    });
-    if (run.signal === 'SIGTERM') {
-      return res.json({ success: false, error: 'Time Limit Exceeded', output: null });
-    }
-    if (run.status !== 0) {
-      return res.json({ success: false, error: run.stderr.toString(), output: null });
-    }
-    return res.json({ success: true, output: run.stdout.toString(), error: null });
-  } finally {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    return res.json({ success: true, output: result.output, error: null, verdict: 'Executed' });
+  } catch (err) {
+    return res.status(err.statusCode || 503).json({ message: err.message || 'Execution worker unavailable' });
   }
 });
 
 // POST submit code
 router.post('/', async (req, res) => {
   const { user_id, problem_id, source_code, language } = req.body;
-  if (!user_id || !problem_id || !source_code) {
+  if (!user_id || !problem_id || typeof source_code !== 'string' || !source_code.trim()) {
     return res.status(400).json({ message: 'user_id, problem_id and source_code are required' });
   }
   try {
@@ -58,7 +41,7 @@ router.post('/', async (req, res) => {
     let errorLog = null;
 
     for (const testCase of testCasesResult.rows) {
-      const result = judge(source_code, testCase.input_path, testCase.output_path, problem.time_limit);
+      const result = await judge(source_code, testCase.input_path, testCase.output_path, problem.time_limit);
       totalTime = Math.max(totalTime, result.executionTime || 0);
       if (result.verdict !== 'Accepted') {
         finalVerdict = result.verdict;
@@ -75,6 +58,9 @@ router.post('/', async (req, res) => {
     res.status(201).json(submission.rows[0]);
   } catch (err) {
     console.error(err);
+    if (err.statusCode === 503 || err.code === 'EXECUTION_WORKER_UNAVAILABLE') {
+      return res.status(503).json({ message: 'Execution worker unavailable; submission was not evaluated' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 });
