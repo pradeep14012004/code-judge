@@ -223,7 +223,7 @@ function recoverInterruptedJobs() {
   // The worker is single-instance; on restart, anything left in processing
   // belongs to the previous, now-dead worker and can safely be requeued.
   for (const name of fs.readdirSync(PROCESSING)) {
-    if (!/^[a-f0-9-]{36}\\.json$/.test(name)) continue;
+    if (!/^[a-f0-9-]{36}\.json$/.test(name)) continue;
     const from = path.join(PROCESSING, name);
     const to = path.join(INBOX, name);
     try { fs.renameSync(from, to); } catch (error) { if (error.code !== 'ENOENT') throw error; }
