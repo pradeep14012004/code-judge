@@ -44,7 +44,7 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-codejudge}
       DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
       TC_DIR: /app/testcases
     volumes:
       - testcases_data:/app/uploads
