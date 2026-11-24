@@ -47,20 +47,12 @@ function runCommand(command, args, options = {}) {
 
 function allocateUid() {
   // The worker processes one job at a time and gives each job a fresh UID.
-  for ( (let attempt = 0; attempt < 100; attempt++) ) {
+  for (let attempt = 0; attempt < 100; attempt++) {
     const uid = crypto.randomInt(20000, 60000);
     const check = spawnSync('/usr/bin/pgrep', ['-u', String(uid)], { encoding: 'utf8' });
     if (check.status !== 0) return uid;
   }
   throw new Error('Unable to allocate an unused execution UID');
-}
-
-function dropToUid(uid, command, args) {
-  return [
-    '--signal=KILL',
-    '--kill-after=1s',
-    ...args
-  ];
 }
 
 function privilegedCommand(uid, command, args, cwd, timeoutSeconds, input) {
