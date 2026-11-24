@@ -6,9 +6,9 @@ Security fixes are currently applied to the default branch (`main`). No stable r
 
 ## Important deployment warning
 
-CodeJudge currently compiles and runs submitted C programs as child processes inside the submission-service container. Process timeouts and output-buffer limits do not constitute a secure sandbox. The current implementation must not be exposed to untrusted users or treated as safe for multi-tenant/public execution.
+The submission API now places bounded jobs in a shared queue volume. A separate execution-worker container processes jobs with networking disabled, a read-only root filesystem, no-new-privileges, a minimal capability set, PID/CPU/memory/file-size limits, a bounded temporary filesystem, and a fresh unprivileged UID per job. Job processes do not receive database credentials or access to the API network.
 
-Before any public deployment, the execution service needs a separately enforced isolation boundary, least-privilege execution, disabled network access by default, strict resource limits, filesystem restrictions, and security testing. Submission and history endpoints also require a complete authentication/authorization review.
+This is defense in depth, not a complete security boundary. Containers share the host kernel, and the worker has not been independently audited. Do not expose the service to untrusted users or use it for public/multi-tenant execution until a stronger sandbox (for example gVisor or microVM isolation), authentication/authorization review, and independent security testing are completed.
 
 ## Reporting a vulnerability
 
