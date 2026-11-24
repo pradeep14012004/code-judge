@@ -219,6 +219,17 @@ function processNextJob() {
   return true;
 }
 
+function recoverInterruptedJobs() {
+  // The worker is single-instance; on restart, anything left in processing
+  // belongs to the previous, now-dead worker and can safely be requeued.
+  for (const name of fs.readdirSync(PROCESSING)) {
+    if (!/^[a-f0-9-]{36}\\.json$/.test(name)) continue;
+    const from = path.join(PROCESSING, name);
+    const to = path.join(INBOX, name);
+    try { fs.renameSync(from, to); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  }
+}
+
 function cleanStaleResults() {
   const cutoff = Date.now() - 5 * 60 * 1000;
   for (const name of fs.readdirSync(OUTBOX)) {
@@ -232,6 +243,7 @@ function cleanStaleResults() {
 
 async function main() {
   ensureDirectories();
+  recoverInterruptedJobs();
   console.log('Isolated execution worker started; network access is disabled by container configuration.');
   let lastCleanup = 0;
   while (true) {
