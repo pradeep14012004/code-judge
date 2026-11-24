@@ -1,7 +1,21 @@
-src/oracleJdk-25.jdk/
+# Dependencies and generated output
+node_modules/
+**/node_modules/
+dist/
+build/
+coverage/
+
+# Local environment and secrets
 .env
 .env.*
 !.env.example
-services/auth-service/.env
-node_modules/
-*/node_modules/
+
+# Local editor and operating-system files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs and temporary files
+*.log
+npm-debug.log*
