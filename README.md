@@ -152,4 +152,4 @@ Bug reports, documentation improvements, tests, and security hardening proposals
 
 ## License
 
-A license has not yet been added to this repository. Until the maintainers choose and add a license, the source is publicly viewable but reuse, modification, and redistribution are not granted by default. See GitHub's documentation on [licensing a repository](https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository).
+CodeJudge is licensed under the [Apache License, Version 2.0](LICENSE). You may use, modify, and distribute the project under the terms of that license. The license includes an express patent grant and requires preservation of applicable notices.
