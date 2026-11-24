@@ -122,12 +122,12 @@ function executeJob(job) {
     // Then hand the directory and source to the unprivileged job UID so
     // compilation can read the source and create its output without DAC_OVERRIDE.
     fs.writeFileSync(sourcePath, job.sourceCode, { mode: 0o600 });
+    // Set traversal permissions while the supervisor still owns the directory.
+    // The worker has no FOWNER capability after startup, so chmod after chown
+    // would fail with EPERM. The job UID owns the directory once handed off.
+    fs.chmodSync(workspace, 0o711);
     fs.chownSync(sourcePath, uid, 10002);
     fs.chownSync(workspace, uid, 10002);
-    // The supervisor launches timeout with cwd=workspace before setpriv runs.
-    // Give non-owners traversal only; the job UID remains the directory owner
-    // and retains read/write access needed by GCC and the submitted program.
-    fs.chmodSync(workspace, 0o711);
 
     const compile = privilegedCommand(
       uid, '/usr/bin/gcc',
@@ -181,6 +181,8 @@ function executeJob(job) {
     killUidProcesses(uid);
     // Return directory ownership to the supervisor before removing the job tree.
     fs.chownSync(workspace, 0, 0);
+    // After reclaiming ownership, restore owner-only permissions before delete.
+    fs.chmodSync(workspace, 0o700);
     fs.rmSync(workspace, { recursive: true, force: true });
   }
 }
