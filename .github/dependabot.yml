@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /services/auth-service
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /services/problem-service
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /services/submission-service
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
