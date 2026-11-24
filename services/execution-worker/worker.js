@@ -57,6 +57,9 @@ function allocateUid() {
 
 function privilegedCommand(uid, command, args, cwd, timeoutSeconds, input) {
   const setprivArgs = [
+    '--bounding-set=-all',
+    '--inh-caps=-all',
+    '--ambient-caps=-all',
     '--reuid=' + uid,
     '--regid=10002',
     '--clear-groups',
