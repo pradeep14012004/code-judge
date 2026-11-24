@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
 const QUEUE = process.env.EXECUTION_QUEUE_DIR || '/queue';
+const WORKSPACE_ROOT = process.env.EXECUTION_WORKSPACE_DIR || '/work';
 const INBOX = path.join(QUEUE, 'inbox');
 const PROCESSING = path.join(QUEUE, 'processing');
 const OUTBOX = path.join(QUEUE, 'outbox');
@@ -112,7 +113,7 @@ function executeJob(job) {
   const timeLimitMs = Math.min(MAX_TIME_MS, Math.max(100, Number(job.timeLimitMs) || 2000));
   const compileSeconds = 8;
   const uid = allocateUid();
-  const workspace = fs.mkdtempSync('/tmp/codejudge-');
+  const workspace = fs.mkdtempSync(path.join(WORKSPACE_ROOT, 'codejudge-'));
   let executionTime = 0;
 
   try {
