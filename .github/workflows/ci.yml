@@ -66,7 +66,8 @@ jobs:
             --network none --read-only \
             --cap-drop ALL --cap-add CHOWN --cap-add SETUID --cap-add SETGID \
             --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 \
-            --tmpfs /tmp:rw,nosuid,nodev,size=128m,mode=0755 \
+            --tmpfs /tmp:rw,noexec,nosuid,nodev,size=128m,mode=0755 \\
+            --tmpfs /work:rw,exec,nosuid,nodev,size=128m,mode=1777 \\
             -v codejudge-worker-smoke:/queue codejudge-execution-worker >/dev/null
           docker run --rm --volumes-from codejudge-worker-smoke node:20-bookworm-slim node -e '
             const fs = require("fs");
