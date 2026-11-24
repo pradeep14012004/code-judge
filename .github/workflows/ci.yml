@@ -51,3 +51,46 @@ jobs:
         run: npm install --ignore-scripts
       - name: Check backend JavaScript syntax
         run: find services -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Smoke-test isolated execution worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t codejudge-execution-worker ./services/execution-worker
+          docker volume create codejudge-worker-smoke >/dev/null
+          cleanup() {
+            docker rm -f codejudge-worker-smoke >/dev/null 2>&1 || true
+            docker volume rm codejudge-worker-smoke >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run -d --name codejudge-worker-smoke \
+            --network none --read-only \
+            --cap-drop ALL --cap-add CHOWN --cap-add SETUID --cap-add SETGID \
+            --security-opt no-new-privileges --pids-limit 64 --memory 512m --cpus 1 \
+            --tmpfs /tmp:rw,nosuid,nodev,size=128m,mode=0755 \
+            -v codejudge-worker-smoke:/queue codejudge-execution-worker >/dev/null
+          docker run --rm --volumes-from codejudge-worker-smoke node:20-bookworm-slim node -e '
+            const fs = require("fs");
+            const id = "123e4567-e89b-42d3-a456-426614174000";
+            const inbox = "/queue/inbox/" + id + ".json";
+            const outbox = "/queue/outbox/" + id + ".json";
+            fs.mkdirSync("/queue/inbox", {recursive:true});
+            fs.mkdirSync("/queue/outbox", {recursive:true});
+            fs.writeFileSync(inbox, JSON.stringify({
+              sourceCode: "#include <stdio.h>\\nint main(void) { puts(\\"smoke-ok\\"); return 0; }",
+              input: "", timeLimitMs: 2000
+            }));
+            const deadline = Date.now() + 15000;
+            const poll = () => {
+              if (fs.existsSync(outbox)) {
+                const result = JSON.parse(fs.readFileSync(outbox, "utf8"));
+                if (result.verdict !== "Executed" || result.output.trim() !== "smoke-ok") {
+                  console.error(result); process.exit(1);
+                }
+                console.log("Worker compiled and executed a C smoke-test program.");
+                process.exit(0);
+              }
+              if (Date.now() > deadline) { console.error("Worker smoke test timed out"); process.exit(1); }
+              setTimeout(poll, 100);
+            };
+            poll();
+          '
