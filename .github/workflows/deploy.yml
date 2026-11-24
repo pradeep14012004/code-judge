@@ -26,6 +26,8 @@ jobs:
             context: services/submission-service
           - service: frontend
             context: frontend
+          - service: execution-worker
+            context: services/execution-worker
     steps:
       - name: Check out source
         uses: actions/checkout@v4
