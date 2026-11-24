@@ -9,6 +9,7 @@ const INBOX = path.join(QUEUE, 'inbox');
 const OUTBOX = path.join(QUEUE, 'outbox');
 const MAX_SOURCE_BYTES = 64 * 1024;
 const MAX_INPUT_BYTES = 64 * 1024;
+const MAX_PENDING_JOBS = 100;
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -26,6 +27,11 @@ async function runSource(sourceCode, input, timeLimitMs = 2000) {
   }
   if (Buffer.byteLength(input, 'utf8') > MAX_INPUT_BYTES) {
     throw Object.assign(new Error('Input exceeds 64 KiB'), { statusCode: 413 });
+  }
+
+  const pending = await fs.promises.readdir(INBOX).catch(error => error.code === 'ENOENT' ? [] : Promise.reject(error));
+  if (pending.filter(name => name.endsWith('.json') || name.endsWith('.tmp')).length >= MAX_PENDING_JOBS) {
+    throw Object.assign(new Error('Execution queue is full; retry shortly'), { statusCode: 429 });
   }
 
   const id = randomUUID();
