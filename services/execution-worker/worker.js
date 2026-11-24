@@ -117,7 +117,6 @@ function executeJob(job) {
 
   try {
     fs.chownSync(workspace, uid, 10002);
-    fs.chmodSync(workspace, 0o700);
     const sourcePath = path.join(workspace, 'main.c');
     const binaryPath = path.join(workspace, 'program');
     fs.writeFileSync(sourcePath, job.sourceCode, { mode: 0o600 });
@@ -141,7 +140,6 @@ function executeJob(job) {
       };
     }
 
-    fs.chmodSync(binaryPath, 0o700);
     const start = process.hrtime.bigint();
     const run = privilegedCommand(
       uid, binaryPath, [],
@@ -174,6 +172,8 @@ function executeJob(job) {
     };
   } finally {
     killUidProcesses(uid);
+    // Return directory ownership to the supervisor before removing the job tree.
+    fs.chownSync(workspace, 0, 0);
     fs.rmSync(workspace, { recursive: true, force: true });
   }
 }
