@@ -124,6 +124,10 @@ function executeJob(job) {
     fs.writeFileSync(sourcePath, job.sourceCode, { mode: 0o600 });
     fs.chownSync(sourcePath, uid, 10002);
     fs.chownSync(workspace, uid, 10002);
+    // The supervisor launches timeout with cwd=workspace before setpriv runs.
+    // Give non-owners traversal only; the job UID remains the directory owner
+    // and retains read/write access needed by GCC and the submitted program.
+    fs.chmodSync(workspace, 0o711);
 
     const compile = privilegedCommand(
       uid, '/usr/bin/gcc',
