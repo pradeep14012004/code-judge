@@ -3,9 +3,9 @@ FROM node:20-bookworm-slim
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc libc6-dev util-linux procps coreutils \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /queue/inbox /queue/processing /queue/outbox /tmp \
+    && mkdir -p /queue/inbox /queue/processing /queue/outbox /tmp /work \
     && chmod 0700 /queue /queue/inbox /queue/processing /queue/outbox \
-    && chmod 0755 /tmp
+    && chmod 0755 /tmp /work
 
 WORKDIR /app
 COPY worker.js ./worker.js
