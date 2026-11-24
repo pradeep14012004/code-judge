@@ -93,7 +93,8 @@ services:
     mem_limit: 512m
     cpus: 1.0
     tmpfs:
-      - /tmp:rw,nosuid,nodev,size=128m,mode=0755
+      - /tmp:rw,noexec,nosuid,nodev,size=128m,mode=0755
+      - /work:rw,exec,nosuid,nodev,size=128m,mode=1777
     environment:
       EXECUTION_QUEUE_DIR: /queue
     volumes:
