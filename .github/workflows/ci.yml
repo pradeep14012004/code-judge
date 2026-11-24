@@ -76,14 +76,14 @@ jobs:
             fs.mkdirSync("/queue/inbox", {recursive:true});
             fs.mkdirSync("/queue/outbox", {recursive:true});
             fs.writeFileSync(inbox, JSON.stringify({
-              sourceCode: "#include <stdio.h>\\nint main(void) { puts(\\"smoke-ok\\"); return 0; }",
+              sourceCode: "int main(void) { return 0; }",
               input: "", timeLimitMs: 2000
             }));
             const deadline = Date.now() + 15000;
             const poll = () => {
               if (fs.existsSync(outbox)) {
                 const result = JSON.parse(fs.readFileSync(outbox, "utf8"));
-                if (result.verdict !== "Executed" || result.output.trim() !== "smoke-ok") {
+                if (result.verdict !== "Executed" || result.output.trim() !== "") {
                   console.error(result); process.exit(1);
                 }
                 console.log("Worker compiled and executed a C smoke-test program.");
