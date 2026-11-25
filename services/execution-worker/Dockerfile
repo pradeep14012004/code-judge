@@ -9,6 +9,7 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY worker.js ./worker.js
+COPY execution-result.js ./execution-result.js
 
 ENV NODE_ENV=production
 CMD ["node", "worker.js"]
