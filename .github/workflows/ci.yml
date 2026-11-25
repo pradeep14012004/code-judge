@@ -51,6 +51,8 @@ jobs:
         run: npm install --ignore-scripts
       - name: Check backend JavaScript syntax
         run: find services -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Test execution timeout classification
+        run: node --test services/execution-worker/test/*.test.js
       - name: Smoke-test isolated execution worker
         shell: bash
         run: |
