@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { spawnSync } = require('child_process');
+const { isTimeLimitExceeded } = require('./execution-result');
 
 const QUEUE = process.env.EXECUTION_QUEUE_DIR || '/queue';
 const WORKSPACE_ROOT = process.env.EXECUTION_WORKSPACE_DIR || '/work';
@@ -158,10 +159,7 @@ function executeJob(job) {
     if (run.error && run.error.code === 'ENOBUFS') {
       return { verdict: 'Output Limit Exceeded', error: 'Program output exceeded the limit', output: '', executionTime };
     }
-    if (run.error && run.error.code === 'ETIMEDOUT') {
-      return { verdict: 'Time Limit Exceeded', error: 'Execution timed out', output: '', executionTime };
-    }
-    if (run.status === 124 || run.status === 137) {
+    if (isTimeLimitExceeded(run)) {
       return { verdict: 'Time Limit Exceeded', error: 'Execution time limit exceeded', output: '', executionTime };
     }
     if (run.status !== 0) {
